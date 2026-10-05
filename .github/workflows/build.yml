@@ -36,7 +36,9 @@ jobs:
       - name: Empacotar IPA
         run: |
           APP=build/Build/Products/Release-iphoneos/ValeACorrida.app
-          ls -la "$APP" "$APP/PlugIns" || true
+          test -f "$APP/PlugIns/Leitor.appex/Leitor" || { echo "::error::Leitor de Ofertas não foi embutido no app"; exit 1; }
+          { echo "Conteúdo verificado:"; echo '```'; (cd "$APP/.." && find ValeACorrida.app -type f -name '*' -maxdepth 3 | grep -E '(ValeACorrida|Leitor|Info.plist)$' | sort); echo '```'; } > conteudo.md
+          cat conteudo.md
           mkdir -p Payload
           cp -R "$APP" Payload/
           zip -qry ValeACorrida.ipa Payload
@@ -53,6 +55,6 @@ jobs:
         with:
           tag_name: build-${{ github.run_number }}
           name: Vale a Corrida · build ${{ github.run_number }}
-          body: Baixe o arquivo ValeACorrida.ipa e instale com o Sideloadly.
+          body_path: conteudo.md
           files: ValeACorrida.ipa
           make_latest: true
